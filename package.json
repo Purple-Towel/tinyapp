@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Purple-Towel/tinyapp/issues"
   },
-  "homepage": "https://github.com/Purple-Towel/tinyapp#readme"
+  "homepage": "https://github.com/Purple-Towel/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
