@@ -45,8 +45,14 @@ app.get("/urls/:short_url", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let shortURLToAdd = generateURL()
+  let longURLToAdd = req.body.longURL; 
+  urlDatabase[`${shortURLToAdd}`] = longURLToAdd;
+  res.redirect(`/urls/${shortURLToAdd}`);         
+});
+
+app.get('/u/:short_url', (req, res) => {
+ res.redirect(`${urlDatabase[`${req.params.short_url}`]}`);
 });
 
 app.get("/set", (req, res) => {
