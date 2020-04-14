@@ -44,6 +44,12 @@ app.get("/urls/:short_url", (req, res) => {
   res.render("url_show", templateVars);
 });
 
+app.post("/urls/:short_url/delete", (req, res) => {
+ let urlToDel = req.params.short_url;
+  delete urlDatabase[`${urlToDel}`];
+  res.redirect("/urls");
+});
+
 app.post("/urls", (req, res) => {
   let shortURLToAdd = generateURL()
   let longURLToAdd = req.body.longURL; 
