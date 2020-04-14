@@ -54,15 +54,7 @@ app.post("/urls", (req, res) => {
 app.get('/u/:short_url', (req, res) => {
  res.redirect(`${urlDatabase[`${req.params.short_url}`]}`);
 });
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
- });
  
- app.get("/fetch", (req, res) => {
-  res.send(`a = ${a}`);
- });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
