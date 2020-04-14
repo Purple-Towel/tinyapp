@@ -50,6 +50,12 @@ app.post("/urls/:short_url/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/urls/:short_url/edit", (req, res) => {
+  let urlToEdit = req.params.short_url;
+  urlDatabase[`${urlToEdit}`] = req.body.newURL;
+   res.redirect("/urls");
+ });
+
 app.post("/urls", (req, res) => {
   let shortURLToAdd = generateURL()
   let longURLToAdd = req.body.longURL; 
