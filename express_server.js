@@ -16,7 +16,16 @@ const generateURL = function() {
     outputURL += characters[Math.floor(Math.random() * characters.length)];
   }
   return outputURL;
-}
+};
+
+const doesEmailExist = function(emailInput) {
+  for (let user in users) {
+    if (users[user].email === emailInput) {
+      return true;
+    }
+  }
+  return false;
+};
 
 app.set("view engine", "ejs");
 
@@ -103,11 +112,16 @@ app.post("/register", (req, res) => {
   let id = generateURL();
   let email = req.body.email;
   let password = req.body.password;
+  if ((email !== "") && (password !== "") && !(doesEmailExist(email))) {
   let userObjToPass = { id, email, password }
   users[id] = userObjToPass;
   res.cookie("user_id", id);
   res.redirect("/urls");
+  } else {
+    res.sendStatus(400);
+  }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
