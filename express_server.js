@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser");
 
 const bodyParser = require("body-parser");
 
+const bcrypt = require('bcrypt');
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -66,14 +68,16 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10),
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10),
   }
 }
+
+// root
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -82,6 +86,8 @@ app.get("/", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
+// URL endpoints
 
 app.get("/urls", (req, res) => {
   let urlsForUser = urlsForUserID(req.cookies["user_id"]);
@@ -134,6 +140,8 @@ app.get("/u/:short_url", (req, res) => {
  res.redirect(`${urlDatabase[`${req.params.short_url}`].longURL}`);
 });
 
+// log in endpoint
+
 app.get("/login", (req, res) => {
   res.render("login");
 })
@@ -143,7 +151,7 @@ app.post("/login", (req, res) => {
   let passwordInput = req.body.password;
   if (doesEmailExist(emailInput)) {
     let id = fetchUserIDFromEmail(emailInput);
-    if (users[`${id}`].password === passwordInput) {
+    if (bcrypt.compareSync(passwordInput, users[`${id}`].password )) {
       res.cookie("user_id", id);
     } else {
       res.sendStatus(403);
@@ -159,6 +167,8 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+// register endpoint
+
 app.get("/register", (req, res) => {
   res.render("register");
 });
@@ -167,8 +177,9 @@ app.post("/register", (req, res) => {
   let id = generateURL();
   let email = req.body.email;
   let password = req.body.password;
+  let hashedPassword = bcrypt.hashSync(password, 10);
   if ((email !== "") && (password !== "") && !(doesEmailExist(email))) {
-  let userObjToPass = { id, email, password }
+  let userObjToPass = { id, email, password: hashedPassword }
   users[id] = userObjToPass;
   res.cookie("user_id", id);
   res.redirect("/urls");
