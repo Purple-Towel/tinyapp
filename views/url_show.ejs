@@ -12,14 +12,20 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL for: <%= longURL.longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
       <div class="card-body">
-        <h5 class="card-title"><form method="POST" action="/urls/<%= shortURL %>/edit">
-        <label for="newURL">New URL:</label>
-        <input type="text" id="newURL" name="newURL">
-        </form></h5>
+        <h5 class="card-title">
+          <% if((typeof userObj === 'object') && (longURL.userID === userObj.id)) { %>
+          <form method="POST" action="/urls/<%= shortURL %>/edit">
+          <label for="newURL">New URL:</label>
+          <input type="text" id="newURL" name="newURL">
+          </form>
+          <% } else{ %>
+            Not Logged in or Not Owner
+            <% } %>
+        </h5>
       </div>
     <div class="card-footer text-muted"></div>
   </div>

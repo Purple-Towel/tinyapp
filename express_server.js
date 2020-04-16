@@ -36,11 +36,30 @@ const fetchUserIDFromEmail = function(emailInput) {
   return null;
 };
 
+const urlsForUserID = function(userIDInput) {
+  let outputURLs = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === userIDInput) {
+      outputURLs[url] = urlDatabase[url];
+    }
+  }
+  return outputURLs;
+};
+
+const isIDSame = function(userIDInput) {
+  for (let url in urlDatabase) {
+   if (urlDatabase[url].userID === userIDInput) {
+      return true;
+    }
+  }
+  return false;
+}
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
 const users = { 
@@ -65,13 +84,18 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, userObj: users[`${req.cookies["user_id"]}`] };
+  let urlsForUser = urlsForUserID(req.cookies["user_id"]);
+  let templateVars = { urls: urlsForUser, userObj: users[`${req.cookies["user_id"]}`] };
   res.render("url_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { userObj: users[`${req.cookies["user_id"]}`] };
-  res.render("url_new", templateVars);
+  if (req.cookies["user_id"]) {
+    let templateVars = { userObj: users[`${req.cookies["user_id"]}`] };
+    res.render("url_new", templateVars);
+  } else {
+    res.redirect("/urls")
+  }
 });
 
 app.get("/urls/:short_url", (req, res) => {
@@ -80,26 +104,34 @@ app.get("/urls/:short_url", (req, res) => {
 });
 
 app.post("/urls/:short_url/delete", (req, res) => {
+  if (isIDSame(req.cookies["user_id"])) {
  let urlToDel = req.params.short_url;
   delete urlDatabase[`${urlToDel}`];
   res.redirect("/urls");
+  } else {
+  res.sendStatus(401);
+}
 });
 
 app.post("/urls/:short_url/edit", (req, res) => {
+  if (isIDSame(req.cookies["user_id"])) {
   let urlToEdit = req.params.short_url;
-  urlDatabase[`${urlToEdit}`] = req.body.newURL;
+  urlDatabase[`${urlToEdit}`].longURL = req.body.newURL;
    res.redirect("/urls");
+  } else {
+    res.sendStatus(401);
+  }
  });
 
 app.post("/urls", (req, res) => {
   let shortURLToAdd = generateURL()
   let longURLToAdd = req.body.longURL; 
-  urlDatabase[`${shortURLToAdd}`] = longURLToAdd;
+  urlDatabase[`${shortURLToAdd}`] = { longURL: longURLToAdd, userID: req.cookies["user_id"] };
   res.redirect(`/urls/${shortURLToAdd}`);         
 });
 
 app.get("/u/:short_url", (req, res) => {
- res.redirect(`${urlDatabase[`${req.params.short_url}`]}`);
+ res.redirect(`${urlDatabase[`${req.params.short_url}`].longURL}`);
 });
 
 app.get("/login", (req, res) => {
