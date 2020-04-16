@@ -15,9 +15,12 @@
               <button type="submit" value="Logout">Logout</button>
           </form>
         <% } else{ %>  
-          <form method="POST" action="/login">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username">
+          Not Logged In
+          <form method="get" action="/login">
+            <button type="submit" value="Login">Login</button>
+          </form>
+          <form method="get" action="/register">
+            <button type="submit" value="Register">Register</button>
           </form>
        <% } %>
       </div>

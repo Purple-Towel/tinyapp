@@ -27,6 +27,15 @@ const doesEmailExist = function(emailInput) {
   return false;
 };
 
+const fetchUserIDFromEmail = function(emailInput) {
+  for (let user in users) {
+    if (users[user].email === emailInput) {
+      return users[user].id;
+    }
+  }
+  return null;
+};
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -92,15 +101,29 @@ app.post("/urls", (req, res) => {
 app.get("/u/:short_url", (req, res) => {
  res.redirect(`${urlDatabase[`${req.params.short_url}`]}`);
 });
+
+app.get("/login", (req, res) => {
+  res.render("login");
+})
  
 app.post("/login", (req, res) => {
-  let usernameInput = req.body.username;
-  res.cookie('username', usernameInput);
+  let emailInput = req.body.email;
+  let passwordInput = req.body.password;
+  if (doesEmailExist(emailInput)) {
+    let id = fetchUserIDFromEmail(emailInput);
+    if (users[`${id}`].password === passwordInput) {
+      res.cookie("user_id", id);
+    } else {
+      res.sendStatus(403);
+    }
+  } else {
+    res.sendStatus(403);
+  }
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls");
 });
 
