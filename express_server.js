@@ -41,6 +41,15 @@ const users = {
   }
 };
 
+// "/" GET
+app.get("/", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls"); 
+  } else {
+    res.redirect("/login");
+  }
+})
+
 // "/urls" GET/POST; shows URLs and adds URLs to the database
 app.get("/urls", (req, res) => {
   let urlsForUser = urlsForUserID(req.session.user_id, urlDatabase);
@@ -60,7 +69,7 @@ app.get("/urls/new", (req, res) => {
     let templateVars = { userObj: users[`${req.session.user_id}`] };
     res.render("url_new", templateVars);
   } else {
-    res.redirect("/urls");
+    res.redirect("/login");
   }
 });
 
