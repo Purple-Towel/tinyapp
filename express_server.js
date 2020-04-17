@@ -44,11 +44,11 @@ const users = {
 // "/" GET
 app.get("/", (req, res) => {
   if (req.session.user_id) {
-    res.redirect("/urls"); 
+    res.redirect("/urls");
   } else {
     res.redirect("/login");
   }
-})
+});
 
 // "/urls" GET/POST; shows URLs and adds URLs to the database
 app.get("/urls", (req, res) => {
