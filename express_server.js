@@ -28,37 +28,30 @@ const generateURL = function() {
   return outputURL;
 };
 
-const doesEmailExist = function(emailInput) {
-  for (let user in users) {
-    if (users[user].email === emailInput) {
+const doesEmailExist = function(emailInput, database) {
+  for (let user in database) {
+    if (database[user].email === emailInput) {
       return true;
     }
   }
   return false;
 };
 
-const fetchUserIDFromEmail = function(emailInput) {
-  for (let user in users) {
-    if (users[user].email === emailInput) {
-      return users[user].id;
-    }
-  }
-  return null;
-};
+const fetchUserIDFromEmail = require("./helpers").fetchUserIDFromEmail
 
-const urlsForUserID = function(userIDInput) {
+const urlsForUserID = function(userIDInput, database) {
   let outputURLs = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === userIDInput) {
-      outputURLs[url] = urlDatabase[url];
+  for (let url in database) {
+    if (database[url].userID === userIDInput) {
+      outputURLs[url] = database[url];
     }
   }
   return outputURLs;
 };
 
-const isIDSame = function(userIDInput) {
-  for (let url in urlDatabase) {
-   if (urlDatabase[url].userID === userIDInput) {
+const isIDSame = function(userIDInput, database) {
+  for (let url in database) {
+   if (database[url].userID === userIDInput) {
       return true;
     }
   }
@@ -98,7 +91,7 @@ app.get("/hello", (req, res) => {
 // URL endpoints
 
 app.get("/urls", (req, res) => {
-  let urlsForUser = urlsForUserID(req.session.user_id);
+  let urlsForUser = urlsForUserID(req.session.user_id, urlDatabase);
   let templateVars = { urls: urlsForUser, userObj: users[`${req.session.user_id}`] };
   res.render("url_index", templateVars);
 });
@@ -118,7 +111,7 @@ app.get("/urls/:short_url", (req, res) => {
 });
 
 app.post("/urls/:short_url/delete", (req, res) => {
-  if (isIDSame(req.session.user_id)) {
+  if (isIDSame(req.session.user_id, urlDatabase)) {
  let urlToDel = req.params.short_url;
   delete urlDatabase[`${urlToDel}`];
   res.redirect("/urls");
@@ -128,7 +121,7 @@ app.post("/urls/:short_url/delete", (req, res) => {
 });
 
 app.post("/urls/:short_url/edit", (req, res) => {
-  if (isIDSame(req.session.user_id)) {
+  if (isIDSame(req.session.user_id, urlDatabase)) {
   let urlToEdit = req.params.short_url;
   urlDatabase[`${urlToEdit}`].longURL = req.body.newURL;
    res.redirect("/urls");
@@ -157,8 +150,8 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   let emailInput = req.body.email;
   let passwordInput = req.body.password;
-  if (doesEmailExist(emailInput)) {
-    let id = fetchUserIDFromEmail(emailInput);
+  if (doesEmailExist(emailInput, users)) {
+    let id = fetchUserIDFromEmail(emailInput, users);
     if (bcrypt.compareSync(passwordInput, users[`${id}`].password )) {
       req.session.user_id = id;
     } else {
@@ -186,7 +179,7 @@ app.post("/register", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   let hashedPassword = bcrypt.hashSync(password, 10);
-  if ((email !== "") && (password !== "") && !(doesEmailExist(email))) {
+  if ((email !== "") && (password !== "") && !(doesEmailExist(email, users))) {
   let userObjToPass = { id, email, password: hashedPassword }
   users[id] = userObjToPass;
   req.session.user_id = id;
